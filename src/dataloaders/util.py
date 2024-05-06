@@ -166,7 +166,7 @@ def extract_embeddings(config, vocab):
                 for i in range(len(arr)):
                     if arr[i] == '.':
                         arr[i] = '0.0'
-                print(arr)
+                # print(arr)
                 embedding_vec = np.array(arr, dtype="float")
                 vectors += [embedding_vec]
                 idx += 1

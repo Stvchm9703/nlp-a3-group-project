@@ -13,4 +13,4 @@ if __name__ == '__main__' :
     # Extract GloVe embeddings for tokens present in the training set vocab
     pprint.pprint(vocab)
 
-    # extract_embeddings(config, vocab)
+    extract_embeddings(config, vocab)

@@ -1,15 +1,15 @@
 {
-  "dataset_dir": "datasets/conllpp_",
-  "glove_file": "datasets/glove_embeddings/glove.6B.300d.txt",
+  "dataset_dir": "dataset",
+  "glove_dir": "glove_embeddings",
   "dataset_path": {
-    "train": "datasets/conllpp_/train.txt",
-    "validation": "datasets/conllpp_/validation.txt",
-    "test": "datasets/conllpp_/test.txt" 
+    "train": ".\\dataset\\train.txt",
+    "validation": ".\\dataset\\validation.txt",
+    "test": ".\\dataset\\test.txt"
   },
-  "word2idx_path": "datasets/conllpp_/word2idx.json",
+  "word2idx_path": ".\\dataset\\word2idx.json",
   "embeddings": {
-    "path": "datasets/conllpp_/embeddings.txt",
-    "size": 300
+    "path": ".\\dataset\\embeddings.txt",
+    "size": 100
   },
   "class_mapping": {
     "O": 0,
@@ -28,7 +28,7 @@
   "PAD_label": -1,
   "PAD_idx": 1,
 
-
+  // model config
   "max_len": 128,
   "use_gpu": true,
   "seed": 26,
