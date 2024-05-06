@@ -4,7 +4,7 @@ from collections import defaultdict
 import torch
 from torch.utils.data import Dataset
 
-import util
+from  . import util 
 
 class CoNLLDataset(Dataset):
     """Implements CoNLL2003 dataset consumption class.      
@@ -15,10 +15,10 @@ class CoNLLDataset(Dataset):
         - @input_tokens and @ner_labels_per_token are also separated by [TAB]
     """
     def __init__(self, config, subset_name, separator="\t"):
-        
+
         self._subset_name = subset_name
         self._dataset_name = "conllpp"
-        
+        path = config["dataset_path"][subset_name]
         with open(path, "r", encoding="utf8") as f:
             self.data = f.readlines()
         self.data = [sample.replace("\n", "") for sample in self.data]
@@ -40,7 +40,6 @@ class CoNLLDataset(Dataset):
         self._max_len = config["max_len"]
 
         self._dataset_size = len(self.data)
-        
 
     def __len__(self):
         return self._dataset_size
@@ -74,7 +73,7 @@ class CoNLLDataset(Dataset):
         padding_mask = torch.ones([self._max_len, ])
         padding_mask[:sample_size] = 0.0
         return tokens, labels, padding_mask
-    
+
 
 def load_dataset():
     dataset_group = util.download_dataset("conllpp")

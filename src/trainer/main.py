@@ -1,4 +1,5 @@
-from .. import (models , dataloaders)
+# from .. import (models , dataloaders)
+
 from models import NERClassifier
 from dataloaders import CoNLLDataset
 
@@ -11,7 +12,7 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from sklearn.metrics import accuracy_score, f1_score, classification_report
 
-from .utils import save_checkpoint, log_gradient_norm
+from . import util
 
 
 def evaluate_model(model, dataloader, writer, device, mode, step, class_mapping=None):
@@ -98,8 +99,8 @@ def train_loop(config, writer, device):
     }
 
     # Create dataloaders
-    train_set = CoNLLDataset(config, config["dataset_path"]["train"])
-    valid_set = CoNLLDataset(config, config["dataset_path"]["validation"])
+    train_set = CoNLLDataset(config, "train")
+    valid_set = CoNLLDataset(config, "validation")
     train_loader = DataLoader(train_set, **train_hyperparams)
     valid_loader = DataLoader(valid_set, **valid_hyperparams)
 
@@ -150,11 +151,11 @@ def train_loop(config, writer, device):
             # Update model weights
             loss.backward()
 
-            log_gradient_norm(model, writer, train_step, "Before")
+            util.log_gradient_norm(model, writer, train_step, "Before")
             torch.nn.utils.clip_grad_norm_(
                 model.parameters(), train_config["gradient_clipping"]
             )
-            log_gradient_norm(model, writer, train_step, "Clipped")
+            util.log_gradient_norm(model, writer, train_step, "Clipped")
             optimizer.step()
 
             writer.add_scalar("Train/Step-Loss", loss.item(), train_step)

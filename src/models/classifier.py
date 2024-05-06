@@ -1,9 +1,12 @@
+# reference to https://github.com/senadkurtisi/pytorch-NER
+
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
 
-from transformer import TransformerEncoder, PositionalEncodings
+from .transformer import TransformerEncoder, PositionalEncodings
 
 
 class ResidualBlock(nn.Module):
