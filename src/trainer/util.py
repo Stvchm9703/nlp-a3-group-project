@@ -16,17 +16,19 @@ def log_gradient_norm(model, writer, step, mode, norm_type=2):
 
 def save_checkpoint(model, start_time, epoch):
     """Saves specified model checkpoint."""
-    target_dir = f"checkpoints\\{start_time}"
+    target_dir = os.path.join("checkpoints", f"{start_time}")
     os.makedirs(target_dir, exist_ok=True)
     # Save model weights
-    save_path = f"{target_dir}\\model_{epoch}.pth"
+    save_path = os.path.join(target_dir, f"model_{epoch}.pth")
     torch.save(model.state_dict(), save_path)
     print("Model saved to:", save_path)
 
     # Save model configuration
-    if not os.path.exists(f"{target_dir}\\config.json"):
+    if not os.path.exists(os.path.join(target_dir, "config.json")):
         shutil.copy("config.json", os.path.join(target_dir, "config.json"))
-        shutil.copy("src/models/classifier.py", os.path.join(target_dir, "classifier.py"))
+        shutil.copy(
+            "src/models/classifier.py", os.path.join(target_dir, "classifier.py")
+        )
         shutil.copy(
             "src/models/transformer.py", os.path.join(target_dir, "transformer.py")
         )
