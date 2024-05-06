@@ -40,4 +40,4 @@
 
 
 ## GloVe: Global Vectors for Word Representations
-curl -O https://downloads.cs.stanford.edu/nlp/data/glove.6B.zipss
+curl -O https://downloads.cs.stanford.edu/nlp/data/glove.6B.zip
