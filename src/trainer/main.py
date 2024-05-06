@@ -183,5 +183,5 @@ def train_loop(config, writer, device):
             )
             model.train()
 
-        save_checkpoint(model, start_time, epoch)
+        util.save_checkpoint(model, start_time, epoch)
         print()

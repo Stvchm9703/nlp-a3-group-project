@@ -1,8 +1,6 @@
-
 import torch
 import shutil
 import os
-    
 
 
 def log_gradient_norm(model, writer, step, mode, norm_type=2):
@@ -28,6 +26,8 @@ def save_checkpoint(model, start_time, epoch):
     # Save model configuration
     if not os.path.exists(f"{target_dir}\\config.json"):
         shutil.copy("config.json", os.path.join(target_dir, "config.json"))
-        shutil.copy("classifier.py", os.path.join(target_dir, "classifier.py"))
-        shutil.copy("transformer.py", os.path.join(target_dir, "transformer.py"))
-        shutil.copy("utils.py", os.path.join(target_dir, "utils.py"))
+        shutil.copy("src/models/classifier.py", os.path.join(target_dir, "classifier.py"))
+        shutil.copy(
+            "src/models/transformer.py", os.path.join(target_dir, "transformer.py")
+        )
+        shutil.copy("src/trainer/util.py", os.path.join(target_dir, "utils.py"))
