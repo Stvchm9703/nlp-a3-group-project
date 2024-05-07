@@ -73,7 +73,6 @@ class NERClassifier(nn.Module):
         """Performs forward pass of the module."""
         # Get token embeddings for each word in a sequence
         x = self.embedding_layer(x)
-
         # Map input tokens to the transformer embedding dim
         x = self.entry_mapping(x)
         x = F.leaky_relu(x)

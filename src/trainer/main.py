@@ -163,24 +163,8 @@ def train_loop(config, writer, device):
 
         with torch.no_grad():
             model.eval()
-            evaluate_model(
-                model,
-                train_loader,
-                writer,
-                device,
-                "Train",
-                epoch,
-                reverse_class_mapping,
-            )
-            evaluate_model(
-                model,
-                valid_loader,
-                writer,
-                device,
-                "Validation",
-                epoch,
-                reverse_class_mapping,
-            )
+            evaluate_model( model, train_loader, writer, device, "Train", epoch, reverse_class_mapping, )
+            evaluate_model( model, valid_loader, writer, device, "Validation", epoch, reverse_class_mapping, )
             model.train()
 
         util.save_checkpoint(model, start_time, epoch)
