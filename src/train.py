@@ -1,8 +1,22 @@
-import tensorflow as tf
+import json
 
-import .models.base_model as models
+import torch
+from tensorboardX import SummaryWriter
 
-def model_init():
-    model_set = models.Transformer(
-        num_layers=8, d_model=512, num_heads=8, dff=2048,
-        input_vocab_size=8500, target_vocab_size=8000)
+from  trainer import train_loop
+
+
+def main():
+    # Load the pipeline configuration file
+    with open("config.json", "r", encoding="utf8") as f:
+        config = json.load(f)
+
+    writer = SummaryWriter()
+    use_gpu = config["use_gpu"] and torch.cuda.is_available()
+    device = torch.device("cuda" if use_gpu else "cpu")
+
+    train_loop(config, writer, device)
+
+
+if __name__ == "__main__":
+    main()
