@@ -37,7 +37,6 @@
    - **Data Points**: Includes over 300,000 tokens annotated with named entity tags.
    - **Usage Decision**: Decided to use this dataset for upcoming projects due to its comprehensiveness and established benchmarking capabilities.
 
-
-
 ## GloVe: Global Vectors for Word Representations
 curl -O https://downloads.cs.stanford.edu/nlp/data/glove.6B.zip
+
