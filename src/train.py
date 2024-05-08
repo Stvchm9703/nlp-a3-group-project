@@ -5,7 +5,7 @@ import torch
 
 from models.NerTransformer.classifier import NERClassifier
 from  trainer import train_loop
-from trainer import create_trainner
+from trainer import create_train_unit
 from torch.utils.data import DataLoader
 
 from dataloaders import CoNLLDataset
@@ -31,7 +31,7 @@ def main():
                               batch_size=config["batch_size"]["validation"],
                               shuffle=False,
                               drop_last=True)
-    create_trainner(
+    create_train_unit(
         model=model,
         train_dataloader=train_loader,
         val_dataloader=valid_loader,
