@@ -1,2 +1,1 @@
-from .classifier import *
-from .transformer import *
+from .NerTransformer import NERClassifier

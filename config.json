@@ -57,6 +57,11 @@
       5.17214967,
       4.0863506,
       5.18262097
-    ]
+    ],
+    "log": {
+      "log_dir": "logs",
+      "log_interval": 100,
+      "checkpoint_interval": 1000
+    }
   }
 }

@@ -15,6 +15,77 @@ from sklearn.metrics import accuracy_score, f1_score, classification_report
 from . import util
 
 
+from torcheval.metrics import BinaryAccuracy
+from torchtnt.framework import TrainUnit, fit, State
+from torchtnt.framework.callbacks import TorchSnapshotSaver
+from torchtnt.utils import copy_data_to_device, init_from_env, seed, TLRScheduler
+from torchtnt.utils.loggers import CSVLogger
+
+
+from typing import List, Tuple
+
+Batch = Tuple[torch.Tensor, torch.Tensor]
+
+class NerTrainUnit(TrainUnit[Batch]):
+
+    def __init__(
+        self,
+        module: torch.nn.Module,
+        optimizer: torch.optim.Optimizer,
+        lr_scheduler: TLRScheduler,
+        device: torch.device,
+        train_accuracy: BinaryAccuracy,
+        logger: CSVLogger,
+        log_every_n_steps: int,
+    ) -> None:
+        super().__init__()
+        self.module = module
+        self.optimizer = optimizer
+        self.lr_scheduler = lr_scheduler
+        self.device = device
+
+        # create an accuracy Metric to compute the accuracy of training
+        self.train_accuracy = train_accuracy
+        self.log_every_n_steps = log_every_n_steps
+
+        self.logger = logger
+
+    def train_step(self, state: State, data: Batch) -> None:
+        data = copy_data_to_device(data, self.device)
+        inputs, targets = data
+
+        # convert targets to float Tensor for binary_cross_entropy_with_logits
+        targets = targets.float()
+
+        outputs = self.module(inputs)
+        outputs = torch.squeeze(outputs)
+        loss = torch.nn.functional.binary_cross_entropy_with_logits(outputs, targets)
+        loss.backward()
+
+        self.optimizer.step()
+        self.optimizer.zero_grad()
+
+        # update metrics & logs
+        self.train_accuracy.update(outputs, targets)
+        step_count = self.train_progress.num_steps_completed
+        if (step_count + 1) % self.log_every_n_steps == 0:
+            accuracy = self.train_accuracy.compute()
+            self.logger.log("loss", loss, step_count)
+            self.logger.log("accuracy", accuracy, step_count)
+
+    def on_train_epoch_end(self, state: State) -> None:
+        # compute and log the metrics at the end of epoch
+        step_count = self.train_progress.num_steps_completed
+        accuracy = self.train_accuracy.compute()
+        self.logger.log("accuracy_epoch", accuracy, step_count)
+
+        # reset the metric at the end of every epoch
+        self.train_accuracy.reset()
+
+        # step the learning rate scheduler
+        self.lr_scheduler.step()
+
+
 def evaluate_model(model, dataloader, writer, device, mode, step, class_mapping=None):
     """Evaluates the model performance."""
     if mode not in ["Train", "Validation"]:
@@ -169,3 +240,48 @@ def train_loop(config, writer, device):
 
         util.save_checkpoint(model, start_time, epoch)
         print()
+
+
+def create_trainner(
+    model, model_name, 
+    train_dataloader, valid_dataloader,
+    device , config) -> None:
+
+    # path = tempfile.mkdtemp()
+    csv_path = "logs/train_log.csv"
+    logger = CSVLogger(csv_path, steps_before_flushing=1)
+
+    # model = prepare_model(args.input_dim, device)
+    optimizer = torch.optim.AdamW(
+        model.parameters(),
+        lr=config["learning_rate"],
+        weight_decay=config["l2_penalty"],
+    )
+    lr_scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
+    train_accuracy = BinaryAccuracy(device=device)
+
+    train_unit = NerTrainUnit(
+        module=model,
+        optimizer=optimizer,
+        lr_scheduler=lr_scheduler,
+        device=device,
+        train_accuracy=train_accuracy,
+        logger=logger,
+        log_every_n_steps=config['log_every_n_steps'],
+    )
+
+    tss = TorchSnapshotSaver(
+        dirpath=config['snapshot_dir'],
+        save_every_n_epochs=2,
+    )
+
+    fit(
+        train_unit,
+        train_dataloader=train_dataloader,
+        eval_dataloader=valid_dataloader,
+        max_epochs=config["num_of_epochs"],
+        max_steps=config["steps"],
+        evaluate_every_n_steps=200,
+        evaluate_every_n_epochs=50,
+        callbacks=[tss],
+    )
