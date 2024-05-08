@@ -1,0 +1,40 @@
+# train_ner_model.py
+import torch
+from transformers import BertForTokenClassification, AdamW
+from tqdm import tqdm
+
+from ..BiLSTM_CRF.dataset import label_len, label_names
+
+from .dataset import train_loader 
+
+# 파인튜닝할 모델 로드
+model = BertForTokenClassification.from_pretrained('bert-base-cased', num_labels=label_len)
+
+# 데이터 로더 설정
+
+# 옵티마이저 설정
+optimizer = AdamW(model.parameters(), lr=5e-5)
+
+# 모델 학습
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model.to(device)
+
+model.train()
+for epoch in range(3):  # 에폭 수
+    count = 0
+    progress_bar = tqdm(enumerate(train_loader), total=len(train_loader), desc=f"Epoch {epoch}")
+    for i, batch in progress_bar:
+        batch = {k: v.to(device) for k, v in batch.items()}
+
+        if 'mask' in batch:  # Rename 'mask' to 'attention_mask' if that's what it represents
+            batch['attention_mask'] = batch['mask']
+            del batch['mask']
+
+        outputs = model(**batch)
+        loss = outputs.loss
+        loss.backward()
+        optimizer.step()
+        optimizer.zero_grad()
+        #print(f"Epoch {epoch}, count {}, batch_size: {batch['input_ids'].size(0)} Loss: {loss.item()}")
+    print(f"Epoch {epoch}, Loss: {loss.item()}")
+

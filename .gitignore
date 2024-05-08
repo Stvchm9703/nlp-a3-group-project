@@ -159,5 +159,8 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 datasets/glove_embeddings/glove.840B.300d.txt
+alternatives/pytorch_NER/glove_embeddings/glove.6B.100d.txt
 
 datasets/*
+
+
