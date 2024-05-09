@@ -164,3 +164,5 @@ alternatives/pytorch_NER/glove_embeddings/glove.6B.100d.txt
 datasets/*
 
 
+runs
+checkpoints
