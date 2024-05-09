@@ -32,32 +32,30 @@ class ResidualBlock(nn.Module):
 class NERClassifier(nn.Module):
     """Represents model which classifies named entities in the given body of text."""
 
-    def __init__(self, config):
+    def __init__(self, **kwargs):
         """Initializes the module."""
         super(NERClassifier, self).__init__()
-        num_classes = len(config["class_mapping"])
-        embedding_dim = config["embeddings"]["size"]
-        num_of_transformer_layers = config["num_of_transformer_layers"]
-        transformer_embedding_dim = config["transformer_embedding_dim"]
-        attention_heads = config["attention_heads"]
-        ff_dim = config["transformer_ff_dim"]
-        dropout = config["dropout"]
-
+        num_classes = kwargs.get("num_classes")
+        embedding_dim = kwargs.get("embedding_dim")
+        num_of_transformer_layers = kwargs.get("num_of_transformer_layers")
+        transformer_embedding_dim = kwargs.get("transformer_embedding_dim")
+        attention_heads = kwargs.get("attention_heads")
+        ff_dim = kwargs.get("transformer_ff_dim")
+        dropout = kwargs.get("dropout")
+        word_embeddings = kwargs.get("word_embeddings")
+        padding_idx = kwargs.get("padding_idx")
+        positional_encodings_max_len = kwargs.get("positional_encodings_max_len")
         # Load pretrained word embeddings
-        word_embeddings = torch.Tensor(np.loadtxt(config["embeddings"]["path"]))
+        word_embeddings = torch.Tensor(word_embeddings)
         self.embedding_layer = nn.Embedding.from_pretrained(
-            word_embeddings,
-            freeze=True,
-            padding_idx=config["PAD_idx"]
+            word_embeddings, freeze=True, padding_idx=padding_idx
         )
 
         self.entry_mapping = nn.Linear(embedding_dim, transformer_embedding_dim)
         self.res_block = ResidualBlock(transformer_embedding_dim)
 
         self.positional_encodings = PositionalEncodings(
-            config["max_len"],
-            transformer_embedding_dim,
-            dropout
+            positional_encodings_max_len, transformer_embedding_dim, dropout
         )
 
         self.transformer_encoder = TransformerEncoder(
@@ -65,7 +63,7 @@ class NERClassifier(nn.Module):
             attention_heads,
             transformer_embedding_dim,
             ff_dim,
-            dropout
+            dropout,
         )
         self.classifier = nn.Linear(transformer_embedding_dim, num_classes)
 
@@ -87,3 +85,18 @@ class NERClassifier(nn.Module):
 
         y_pred = self.classifier(x)
         return y_pred
+
+
+def create_model_from_config(config):
+    return {
+        "num_classes": len(config["class_mapping"]),
+        "embedding_dim": config["embeddings"]["size"],
+        "num_of_transformer_layers": config["num_of_transformer_layers"],
+        "transformer_embedding_dim": config["transformer_embedding_dim"],
+        "attention_heads": config["attention_heads"],
+        "transformer_ff_dim": config["transformer_ff_dim"],
+        "dropout": config["dropout"],
+        "word_embeddings": np.loadtxt(config["embeddings"]["path"]),
+        "padding_idx": config["PAD_idx"],
+        "positional_encodings_max_len": config["max_len"],
+    }

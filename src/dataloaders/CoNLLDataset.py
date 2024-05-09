@@ -2,8 +2,7 @@ import json
 from collections import defaultdict
 
 import torch
-from torch.utils.data import Dataset
-
+from torch.utils.data import Dataset,DataLoader
 from  . import util 
 
 class CoNLLDataset(Dataset):
@@ -72,17 +71,60 @@ class CoNLLDataset(Dataset):
         # Define the padding mask
         padding_mask = torch.ones([self._max_len, ])
         padding_mask[:sample_size] = 0.0
-        return tokens, labels, padding_mask
-
+        # return tokens, labels, padding_mask
+        return (tokens, padding_mask), labels  # x  # 'padding_mask'  # y
 
 def load_dataset():
     dataset_group = util.download_dataset("conllpp")
-    
+
     train_set = dataset_group["train"]
     valid_set = dataset_group["validation"]
     test_set = dataset_group["test"]
-    
-    
+
     train_set_processed = util.process_subset(train_set)
     valid_set_processed = util.process_subset(valid_set)
     test_set_processed = util.process_subset(test_set)
+
+
+def create_train_dataset(config) -> DataLoader:
+    # Define dataloader hyper-parameters
+    train_hyperparams = {
+        "batch_size": config["batch_size"]["train"],
+        "shuffle": True,
+        "drop_last": True,
+    }
+   
+    # Create dataloaders
+    train_set = CoNLLDataset(config, "train")
+    train_loader = DataLoader(train_set, **train_hyperparams)
+
+    return train_loader
+
+def create_validation_dataset(config)-> DataLoader:
+    # Define dataloader hyper-parameters
+    valid_hyperparams = {
+        "batch_size": config["batch_size"]["validation"],
+        "shuffle": False,
+        "drop_last": True,
+    }
+
+    # Create dataloaders
+    valid_set = CoNLLDataset(config, "validation")
+    valid_loader = DataLoader(valid_set, **valid_hyperparams)
+
+    return valid_loader
+
+
+def create_test_dataset(config) -> DataLoader:
+    # Define dataloader hyper-parameters
+    test_hyperparams = {
+        "batch_size": config["batch_size"]["test"],
+        "shuffle": False,
+        "drop_last": True,
+    }
+
+    # Create dataloaders
+    test_set = CoNLLDataset(config, "validation")
+    test_loader = DataLoader(test_set, **test_hyperparams)
+
+    return test_loader
