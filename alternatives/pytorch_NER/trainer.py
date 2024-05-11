@@ -5,6 +5,10 @@ import torch
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from sklearn.metrics import accuracy_score, f1_score, classification_report
+from sklearn.metrics import classification_report
+from sklearn.metrics import confusion_matrix
+import matplotlib.pyplot as plt
+import seaborn as sns
 from tqdm import tqdm 
 
 
@@ -15,9 +19,9 @@ from utils import save_checkpoint, log_gradient_norm
 
 def evaluate_model(model, dataloader, writer, device, mode, step, class_mapping=None):
     """Evaluates the model performance."""
-    if mode not in ["Train", "Validation"]:
+    if mode not in ["Train", "Validation", "Test"]:
         raise ValueError(
-            f"Invalid value for mode! Expected 'Train' or 'Validation but received {mode}"
+            f"Invalid value for mode! Expected 'Train', 'Validation' or 'Test' but received {mode}"
         )
 
     if class_mapping is None:
@@ -78,7 +82,19 @@ def evaluate_model(model, dataloader, writer, device, mode, step, class_mapping=
     writer.add_scalar(f"{mode}/F1-Non-O",
                       f1_non_O, step)
 
-    print(classification_report(y_true_accumulator, y_pred_accumulator, digits=4, zero_division=0))
+    label_names = class_mapping.values()
+    #print(f"label_names={label_names}")
+    if mode=="Test":
+        cm = confusion_matrix(y_true_accumulator, y_pred_accumulator)
+        plt.figure(figsize=(10,7))
+        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=label_names, yticklabels=label_names)
+        plt.xlabel('Predicted')
+        plt.ylabel('True')
+        plt.title('Confusion Matrix')
+        plt.savefig('../../images/pytorch_NER_confusion_matrix.png')  # Save as PNG
+        plt.close()
+    else:
+        print(classification_report(y_true_accumulator, y_pred_accumulator, digits=4, zero_division=0))
 
 
 def train_loop(config, writer, device):
@@ -109,8 +125,10 @@ def train_loop(config, writer, device):
     # Create dataloaders
     train_set = CoNLLDataset(config, config["dataset_path"]["train"])
     valid_set = CoNLLDataset(config, config["dataset_path"]["validation"])
+    test_set = CoNLLDataset(config, config["dataset_path"]["test"])
     train_loader = DataLoader(train_set, **train_hyperparams)
     valid_loader = DataLoader(valid_set, **valid_hyperparams)
+    test_loader = DataLoader(test_set, **valid_hyperparams)
 
     # Instantiate the model
     model = NERClassifier(config)
@@ -138,7 +156,13 @@ def train_loop(config, writer, device):
 
     train_step = 0
     start_time = time.strftime("%b-%d_%H-%M-%S")
-    for epoch in range(train_config["num_of_epochs"]):
+    
+    epoch_num = train_config["num_of_epochs"] 
+
+    # for debug
+    #epoch_num = 0
+
+    for epoch in range(epoch_num):
         #print("Epoch:", epoch)
         model.train()
 
@@ -178,3 +202,6 @@ def train_loop(config, writer, device):
 
         #save_checkpoint(model, start_time, epoch)
         print()
+
+    evaluate_model(model, test_loader, writer, device,
+                           "Test", epoch_num, reverse_class_mapping)

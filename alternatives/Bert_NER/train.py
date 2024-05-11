@@ -1,8 +1,11 @@
 from torch.optim import Adam
 from .model import create_model
 from ..BiLSTM_CRF.dataset import label_len, label_names
-from .dataset import get_train_loader, get_valid_loader, get_sampled_train_loader, get_sampled_valid_loader
+from .dataset import get_train_loader, get_valid_loader, get_test_loader #, get_sampled_train_loader, get_sampled_valid_loader
 from sklearn.metrics import classification_report
+from sklearn.metrics import confusion_matrix
+import matplotlib.pyplot as plt
+import seaborn as sns
 from tqdm import tqdm
 import torch
 
@@ -59,8 +62,17 @@ def eval_model(model, data_loader, mode):
     filtered_labels = [label for label in all_labels if label != -100]
     filtered_preds = [pred for label, pred in zip(all_labels, all_preds) if label != -100]
 
-    # 수정된 레이블로 분류 보고서 생성
-    print(classification_report(filtered_labels, filtered_preds, target_names=label_names, zero_division=0))
+    if mode=="Test":
+        cm = confusion_matrix(all_labels, all_preds)
+        plt.figure(figsize=(10,7))
+        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=label_names, yticklabels=label_names)
+        plt.xlabel('Predicted')
+        plt.ylabel('True')
+        plt.title('Confusion Matrix')
+        plt.savefig('images/Bert_NER_confusion_matrix.png')  # Save as PNG
+        plt.close()
+    else:
+        print(classification_report(filtered_labels, filtered_preds, target_names=label_names, zero_division=0))
 
 
     return total_loss / len(data_loader)
@@ -68,6 +80,7 @@ def eval_model(model, data_loader, mode):
 
 train_loader = get_train_loader()
 valid_loader = get_valid_loader()
+test_loader = get_test_loader()
 
 #train_loader = get_sampled_train_loader()
 #valid_loader = get_valid_loader()
@@ -81,10 +94,13 @@ print(model)
 model = model.to(device)
 optimizer = Adam(model.parameters(), lr=5e-5)
 
-for epoch in range(20):  
+#epoch_num = 0
+epoch_num = 20
+for epoch in range(epoch_num):  
     train_loss = train_epoch(model, train_loader, optimizer, epoch)
     train_eval_loss = eval_model(model, train_loader, "Train")
     val_loss = eval_model(model, valid_loader, "Validation")
     #print(f'Epoch {epoch+1}, Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}')
     print(f"Epoch {epoch}: Train Loss = {train_loss:.4f}, Train Eval Loss = {train_eval_loss:.4f}, Validation Loss = {val_loss:.4f}")
 
+eval_model(model, test_loader, "Test")
