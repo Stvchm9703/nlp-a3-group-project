@@ -44,10 +44,10 @@ To replicate the comparison, follow these steps:
 3. Train and evaluate each model on the CoNLL-2003 dataset.
 4. Record the performance metrics and resource requirements for each model.
 5. Compile the results into a comparison report.
-6. The respective model codes can be found in alternatives folder.
+6. The respective model codes can be found in the alternatives folder.
 
 ## Results
-The results of the comparison will be presented in the comparison report. This report will provide insights into the performance and suitability of each model for NER tasks, considering various evaluation criteria.
+The results of the comparison will be presented in the comparison report. This report will provide insights into the performance and suitability of each model for NER tasks, considering various evaluation criteria. The confusion matrix images are stored in the images folder, and classification reports are stored in the results folder
 
 ### Jupyter Notebook Reports
 Each NER model will have its own Jupyter Notebook report, detailing the training process, evaluation results, and analysis. These reports will be structured to provide a clear overview of the model's performance and insights into its strengths and weaknesses.
