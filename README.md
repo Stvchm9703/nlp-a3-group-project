@@ -44,6 +44,7 @@ To replicate the comparison, follow these steps:
 3. Train and evaluate each model on the CoNLL-2003 dataset.
 4. Record the performance metrics and resource requirements for each model.
 5. Compile the results into a comparison report.
+6. The respective model codes can be found in alternatives folder.
 
 ## Results
 The results of the comparison will be presented in the comparison report. This report will provide insights into the performance and suitability of each model for NER tasks, considering various evaluation criteria.
