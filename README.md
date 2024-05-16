@@ -14,7 +14,7 @@ This project aims to compare the performance of five different Named Entity Reco
 The main objective of this project is to evaluate and compare the effectiveness of various NER models on the CoNLL-2003 dataset. By examining metrics such as accuracy, precision, recall, F1 score, training time, and resource requirements, we aim to identify the strengths and weaknesses of each model.
 
 ## Dataset
-The CoNLL-2003 dataset is utilized for this project. It consists of English news articles annotated with named entity labels, including persons, organizations, locations, and miscellaneous entities.
+The CoNLL-2003 dataset is utilized for this project. It consists of English news articles annotated with named entity labels, including persons, organizations, locations, and miscellaneous entities. Other dataset information is stored in the documents folder.
 
 ## Models
 The following NER models are included in the comparison:
