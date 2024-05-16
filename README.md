@@ -19,10 +19,8 @@ The CoNLL-2003 dataset is utilized for this project. It consists of English news
 ## Models
 The following NER models are included in the comparison:
 1. BiLSTM-CRF
-2. Transformers (e.g., BERT)
-3. SpaCy
-4. AllenNLP
-5. Flair
+2. Transformers based classifier
+3. BERT
 
 ## Comparison Report
 The comparison report will cover the following aspects for each model:
